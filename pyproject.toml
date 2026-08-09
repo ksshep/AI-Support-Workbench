@@ -10,4 +10,6 @@ addopts = "-q"
 filterwarnings = [
     "ignore::DeprecationWarning:rq.*",
     "ignore::DeprecationWarning:starlette.*",
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+    "ignore:.*InsecureKeyLengthWarning",
 ]

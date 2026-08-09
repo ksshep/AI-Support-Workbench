@@ -26,8 +26,14 @@ EMBEDDING_PROVIDER = (os.getenv("EMBEDDING_PROVIDER") or "fake").strip().lower()
 
 EMBEDDING_DIMENSION = 1536
 
-# JWT configuration (used from W1-B onwards; declared now so .env is complete).
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-change-me")
+# JWT authentication.
+# ``JWT_SECRET_KEY`` must be overridden outside local development. The default
+# is an obvious 32-byte placeholder so that a production deploy cannot
+# accidentally ship with a known key.
+JWT_SECRET_KEY = os.getenv(
+    "JWT_SECRET_KEY", "dev-only-placeholder-32-bytes-minimum!"
+)
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
 
 # RQ retry policy.

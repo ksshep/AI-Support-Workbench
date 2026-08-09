@@ -13,4 +13,5 @@ redis
 rq
 fakeredis
 pyjwt
-passlib[bcrypt]
+bcrypt
+email-validator
