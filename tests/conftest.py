@@ -107,3 +107,115 @@ def client():
     with TestClient(app) as test_client:
         yield test_client
         test_client.close()
+
+
+# ---------------------------------------------------------------------------
+# Role-scoped user helpers shared by the ticket test modules.
+# ---------------------------------------------------------------------------
+
+def _login(client, username, password="password123"):
+    return client.post(
+        "/auth/login",
+        data={"username": username, "password": password},
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+
+
+@pytest.fixture
+def customer(client):
+    """A registered customer plus their Bearer token."""
+    client.post(
+        "/auth/register",
+        json={
+            "email": "customer@example.com",
+            "password": "password123",
+            "name": "客户一",
+        },
+    )
+    token = _login(client, "customer@example.com").json()["access_token"]
+    return {
+        "email": "customer@example.com",
+        "name": "客户一",
+        "token": token,
+        "headers": {"Authorization": f"Bearer {token}"},
+    }
+
+
+@pytest.fixture
+def other_customer(client):
+    """A second, independent customer used for cross-tenant checks."""
+    client.post(
+        "/auth/register",
+        json={
+            "email": "customer2@example.com",
+            "password": "password123",
+            "name": "客户二",
+        },
+    )
+    token = _login(client, "customer2@example.com").json()["access_token"]
+    return {
+        "email": "customer2@example.com",
+        "name": "客户二",
+        "token": token,
+        "headers": {"Authorization": f"Bearer {token}"},
+    }
+
+
+@pytest.fixture
+def agent(client, db):
+    """An agent created directly in the DB plus their Bearer token."""
+    from backend.app.models import User
+    from backend.app.security import hash_password
+
+    db.add(User(
+        email="agent@example.com",
+        password_hash=hash_password("password123"),
+        name="客服一号",
+        role="agent",
+    ))
+    db.commit()
+    token = _login(client, "agent@example.com").json()["access_token"]
+    return {
+        "email": "agent@example.com",
+        "name": "客服一号",
+        "token": token,
+        "headers": {"Authorization": f"Bearer {token}"},
+    }
+
+
+@pytest.fixture
+def admin(client, db):
+    """An admin created directly in the DB plus their Bearer token."""
+    from backend.app.models import User
+    from backend.app.security import hash_password
+
+    db.add(User(
+        email="admin@example.com",
+        password_hash=hash_password("password123"),
+        name="管理员",
+        role="admin",
+    ))
+    db.commit()
+    token = _login(client, "admin@example.com").json()["access_token"]
+    return {
+        "email": "admin@example.com",
+        "name": "管理员",
+        "token": token,
+        "headers": {"Authorization": f"Bearer {token}"},
+    }
+
+
+@pytest.fixture
+def ticket(client, customer):
+    """Create one ticket as the customer fixture and return it."""
+    resp = client.post(
+        "/tickets",
+        json={
+            "title": "无法登录系统",
+            "description": "输入正确密码后仍然无法登录",
+            "classification": "technical",
+        },
+        headers=customer["headers"],
+    )
+    assert resp.status_code == 201
+    return resp.json()

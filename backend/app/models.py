@@ -383,7 +383,13 @@ class AIProcessingJob(Base):
 class IdempotencyKey(Base):
     __tablename__ = "idempotency_keys"
     __table_args__ = (
-        UniqueConstraint("key", name="uq_idempotency_keys_key"),
+        # The key is scoped per actor+endpoint so two users may reuse the same
+        # key value without interfering; the composite constraint is the
+        # concurrency backstop for idempotent ticket creation.
+        UniqueConstraint(
+            "key", "actor_id", "endpoint",
+            name="uq_idempotency_keys_key_actor_endpoint",
+        ),
         CheckConstraint("length(key) > 0", name="ck_idempotency_keys_key_not_blank"),
         Index("idx_idempotency_keys_actor_id", "actor_id"),
     )
