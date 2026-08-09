@@ -1,0 +1,13 @@
+[project]
+name = "ai-support-workbench"
+version = "0.1.0"
+description = "AI 客服工单与客服协同平台"
+requires-python = ">=3.13"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning:rq.*",
+    "ignore::DeprecationWarning:starlette.*",
+]

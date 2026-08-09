@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+pytest
+httpx
+python-multipart
+sqlalchemy
+psycopg[binary]
+alembic
+python-dotenv
+pgvector
+pypdf
+redis
+rq
+fakeredis
+pyjwt
+passlib[bcrypt]
