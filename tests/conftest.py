@@ -88,3 +88,22 @@ def db(session_factory):
                                     "knowledge_chunks, knowledge_items, "
                                     "ticket_replies, tickets, users "
                                     "RESTART IDENTITY CASCADE"))
+
+
+@pytest.fixture
+def client():
+    """TestClient against the app with a clean database before each test."""
+    from backend.app.database import engine
+
+    with engine.begin() as connection:
+        connection.execute(text("TRUNCATE TABLE ai_processing_jobs, "
+                                "audit_logs, evaluations, idempotency_keys, "
+                                "knowledge_chunks, knowledge_items, "
+                                "ticket_replies, tickets, users "
+                                "RESTART IDENTITY CASCADE"))
+    from fastapi.testclient import TestClient
+    from backend.app.main import app
+
+    with TestClient(app) as test_client:
+        yield test_client
+        test_client.close()
