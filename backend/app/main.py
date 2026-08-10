@@ -2,7 +2,7 @@
 
 from fastapi import Depends, FastAPI
 
-from .api import auth
+from .api import auth, tickets
 from .config import CHAT_PROVIDER, EMBEDDING_PROVIDER
 from .deps import get_current_user, require_roles
 from .models import User
@@ -14,6 +14,7 @@ app = FastAPI(
 )
 
 app.include_router(auth.router)
+app.include_router(tickets.router)
 
 
 @app.get("/health", tags=["system"])
