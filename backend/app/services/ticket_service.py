@@ -159,6 +159,16 @@ def create_ticket(
         raise
     db.refresh(ticket)
 
+    # W3-A: schedule the AI analysis without blocking the create response.
+    # The job row + RQ enqueue happen in their own transaction so a queue or
+    # job failure can never roll back the ticket that was just created.
+    from . import ai_analysis_service
+
+    try:
+        ai_analysis_service.create_analysis_job(db, ticket_id=ticket.id)
+    except Exception:
+        db.rollback()
+
     return response_payload, status.HTTP_201_CREATED
 
 

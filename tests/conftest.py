@@ -1,6 +1,7 @@
 """Pytest setup: isolated PostgreSQL test database on the running Docker db."""
 
 import os
+import threading
 from pathlib import Path
 
 import pytest
@@ -60,6 +61,31 @@ with engine.begin() as connection:
 
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
+
+
+@pytest.fixture(scope="session")
+def fake_redis():
+    """An ephemeral in-process Redis (fakeredis) for the RQ queue.
+
+    W3-A enqueues ``ticket_analysis`` after ticket creation; pointing the
+    queue at this server keeps every test offline and deterministic. The
+    server lives for the whole session; per-test data isolation is not needed
+    because each test uses freshly created tickets (unique RQ job ids).
+    """
+    from fakeredis import TcpFakeServer
+
+    server = TcpFakeServer(("127.0.0.1", 0))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    port = server.server_address[1]
+    os.environ["REDIS_URL"] = f"redis://127.0.0.1:{port}/0"
+    yield server
+    server.shutdown()
+
+
+@pytest.fixture(autouse=True)
+def _use_fake_redis(fake_redis):
+    """Ensure the RQ queue always points at the fakeredis server."""
+    yield
 
 
 @pytest.fixture(scope="session")
