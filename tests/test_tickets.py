@@ -207,6 +207,7 @@ def test_detail_returns_replies_and_audit_in_order(client, customer, db, ticket)
         ticket_id=created.id,
         sender_id=created.customer_id,
         content="第一条回复",
+        status="sent",
     ))
     db.add(AuditLog(
         actor_id=created.customer_id,
