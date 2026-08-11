@@ -32,6 +32,8 @@ from .database import Base
 TICKET_STATUSES = ("open", "in_review", "replied", "closed", "canceled")
 TICKET_PRIORITIES = ("low", "normal", "high", "urgent")
 TICKET_SENTIMENTS = ("positive", "neutral", "negative")
+# Reply lifecycle values enforced by the database CHECK.
+REPLY_STATUSES = ("draft", "reviewed", "sent")
 USER_ROLES = ("customer", "agent", "admin")
 KNOWLEDGE_STATUSES = ("processing", "ready", "failed")
 KNOWLEDGE_SOURCE_TYPES = ("txt", "pdf")
@@ -169,8 +171,13 @@ class Ticket(Base):
 class TicketReply(Base):
     __tablename__ = "ticket_replies"
     __table_args__ = (
+        CheckConstraint(
+            "status IN ('draft', 'reviewed', 'sent')",
+            name="ck_ticket_replies_status",
+        ),
         CheckConstraint("length(content) > 0", name="ck_ticket_replies_content_not_blank"),
         Index("idx_ticket_replies_ticket_id", "ticket_id"),
+        Index("idx_ticket_replies_status", "status"),
     )
 
     id: Mapped[UUID] = _uuid_pk()
@@ -187,6 +194,22 @@ class TicketReply(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     is_ai_suggestion: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
+    )
+    # Reply lifecycle: draft -> reviewed -> sent. ``status`` is the single
+    # source of truth; ``is_sent`` is kept for W2-A compatibility.
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="draft", server_default="draft"
+    )
+    reviewer_id: Mapped[UUID | None] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    reviewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    sent_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
     )
     is_sent: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"

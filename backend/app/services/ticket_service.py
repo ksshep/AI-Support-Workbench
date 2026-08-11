@@ -258,6 +258,10 @@ def get_ticket_detail(db: Session, *, current_user: User, ticket_id: UUID) -> di
         .where(TicketReply.ticket_id == ticket.id)
         .order_by(TicketReply.created_at.asc())
     ).all()
+    # Customers may only see sent replies, even in the ticket detail view;
+    # draft/reviewed replies are staff-only.
+    if current_user.role == "customer":
+        replies = [r for r in replies if r.status == "sent"]
     audit_rows = db.scalars(
         select(AuditLog)
         .where(AuditLog.entity_type == "ticket", AuditLog.entity_id == ticket.id)
@@ -289,6 +293,7 @@ def get_ticket_detail(db: Session, *, current_user: User, ticket_id: UUID) -> di
             {
                 "id": str(r.id),
                 "content": r.content,
+                "status": r.status,
                 "is_ai_suggestion": r.is_ai_suggestion,
                 "is_sent": r.is_sent,
                 "sender_name": names.get(str(r.sender_id), ""),

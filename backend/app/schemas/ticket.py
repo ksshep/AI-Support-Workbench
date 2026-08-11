@@ -112,6 +112,7 @@ class AuditSummary(BaseModel):
 class ReplyBrief(BaseModel):
     id: str
     content: str
+    status: str
     is_ai_suggestion: bool
     is_sent: bool
     sender_name: str
