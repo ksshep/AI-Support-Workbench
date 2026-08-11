@@ -18,8 +18,23 @@ DATABASE_URL = _require("DATABASE_URL")
 
 REDIS_URL = _require("REDIS_URL", default="redis://localhost:6379/0")
 
-# Chat provider selection: "fake" or "compatible".
+
+def get_redis_url() -> str:
+    """Return the current Redis URL, read lazily from the environment.
+
+    Read on every call (not cached at import time) so tests can point the
+    queue at an ephemeral fakeredis server between cases.
+    """
+    return os.environ.get("REDIS_URL") or "redis://localhost:6379/0"
+
+# Chat provider selection: "fake" or "compatible". Business code never names
+# a vendor: the "compatible" provider speaks the OpenAI-compatible HTTP
+# protocol and reads base URL / API key / model from the environment.
 CHAT_PROVIDER = (os.getenv("CHAT_PROVIDER") or "fake").strip().lower()
+CHAT_BASE_URL = os.getenv("CHAT_BASE_URL", "")
+CHAT_API_KEY = os.getenv("CHAT_API_KEY", "")
+CHAT_MODEL = os.getenv("CHAT_MODEL", "")
+CHAT_TIMEOUT_SECONDS = int(os.getenv("CHAT_TIMEOUT_SECONDS", "30"))
 
 # Embedding provider selection: "fake" or "compatible".
 EMBEDDING_PROVIDER = (os.getenv("EMBEDDING_PROVIDER") or "fake").strip().lower()
