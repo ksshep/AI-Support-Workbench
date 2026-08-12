@@ -38,8 +38,12 @@ CHAT_TIMEOUT_SECONDS = int(os.getenv("CHAT_TIMEOUT_SECONDS", "30"))
 
 # Embedding provider selection: "fake" or "compatible".
 EMBEDDING_PROVIDER = (os.getenv("EMBEDDING_PROVIDER") or "fake").strip().lower()
-
-EMBEDDING_DIMENSION = 1536
+EMBEDDING_BASE_URL = os.getenv("EMBEDDING_BASE_URL", "")
+EMBEDDING_API_KEY = os.getenv("EMBEDDING_API_KEY", "")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "")
+# Must match the VECTOR dimension on ``knowledge_chunks.embedding``.
+EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", "1536"))
+EMBEDDING_TIMEOUT_SECONDS = int(os.getenv("EMBEDDING_TIMEOUT_SECONDS", "30"))
 
 # JWT authentication.
 # ``JWT_SECRET_KEY`` must be overridden outside local development. The default

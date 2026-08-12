@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    LargeBinary,
     SmallInteger,
     String,
     Text,
@@ -242,6 +243,9 @@ class KnowledgeItem(Base):
     source_type: Mapped[str] = mapped_column(String(20), nullable=False)
     file_name: Mapped[str] = mapped_column(String(255), nullable=False)
     file_size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Raw uploaded bytes so the RQ worker (a separate container, no shared
+    # filesystem with the web process) can read the file from the database.
+    file_content: Mapped[bytes] = mapped_column(LargeBinary, nullable=True)
     status: Mapped[str] = mapped_column(
         String(20), nullable=False, default="processing", server_default="processing"
     )
@@ -252,6 +256,12 @@ class KnowledgeItem(Base):
         nullable=False,
     )
     created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
 
     chunks: Mapped[list["KnowledgeChunk"]] = relationship(
         back_populates="knowledge_item",
@@ -277,6 +287,7 @@ class KnowledgeChunk(Base):
             postgresql_using="hnsw",
             postgresql_ops={"embedding": "vector_cosine_ops"},
         ),
+        Index("idx_knowledge_chunks_item_id", "knowledge_item_id"),
     )
 
     id: Mapped[UUID] = _uuid_pk()
@@ -287,6 +298,8 @@ class KnowledgeChunk(Base):
     )
     chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
+    # 1-based source page number for TXT (page 1) or PDF; None when unknown.
+    page_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
     embedding: Mapped[list[float]] = mapped_column(
         Vector(EMBEDDING_DIMENSION), nullable=False
     )
