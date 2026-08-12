@@ -215,6 +215,10 @@ class TicketReply(Base):
     is_sent: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
     )
+    # W4-A: minimal citation metadata for AI-generated drafts. Only the
+    # source summary is stored (knowledge_item_id / title / chunk_index) —
+    # never the full RAG context, prompt or knowledge content.
+    source_refs: Mapped[list[dict] | None] = mapped_column(JSONB, nullable=True)
     created_at: Mapped[datetime] = _created_at()
 
     ticket: Mapped["Ticket"] = relationship(back_populates="replies")
