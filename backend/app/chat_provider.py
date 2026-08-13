@@ -104,6 +104,10 @@ class FakeChatProvider(ChatProvider):
     without touching the network. ``failures_remaining`` decrements on every
     call until it reaches zero, so a test can make the next N calls fail and
     then succeed — exactly what the RQ retry path needs.
+
+    The default payload is chosen by the requested schema: a schema with a
+    ``reply`` field gets the reply-suggestion JSON, anything else gets the
+    ticket-analysis JSON. Tests may override ``raw_output`` explicitly.
     """
 
     name = "fake"
@@ -130,13 +134,24 @@ class FakeChatProvider(ChatProvider):
             raise self.fail_with
         raw = self.raw_output
         if raw is None:
-            raw = (
-                '{"category": "technical", "summary": "用户无法登录系统", '
-                '"priority": "high", "sentiment": "negative", '
-                '"confidence": 0.91, '
-                '"reason": "问题影响核心功能"}'
-            )
+            raw = self._default_output(schema)
         return self.parse_structured(raw, schema)
+
+    @staticmethod
+    def _default_output(schema: type[BaseModel]) -> str:
+        if "reply" in schema.model_fields:
+            return (
+                '{"reply": "您好，我们已收到您的反馈。根据知识库说明，'
+                "请先确认账号和网络连接是否正常。"
+                '", "confidence": 0.86, "should_escalate": false, '
+                '"reason": "知识库中存在与登录异常相关的处理流程。"}'
+            )
+        return (
+            '{"category": "technical", "summary": "用户无法登录系统", '
+            '"priority": "high", "sentiment": "negative", '
+            '"confidence": 0.91, '
+            '"reason": "问题影响核心功能"}'
+        )
 
 
 class OpenAICompatibleChatProvider(ChatProvider):
