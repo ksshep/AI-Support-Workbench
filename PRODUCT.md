@@ -1,60 +1,60 @@
-# Product
+# 产品说明
 
 <!-- impeccable:product-schema 1 -->
 
-## Platform
+## 平台
 
-web
+Web
 
-## Stack
+## 技术栈
 
-delegated: Vue 3, TypeScript, Vite, Vue Router, lucide-vue-next, native fetch, Docker and Nginx, with the existing FastAPI backend as the source of truth.
+由开发方负责选型：Vue 3、TypeScript、Vite、Vue Router、lucide-vue-next、原生 fetch、Docker 和 Nginx；现有 FastAPI 后端是业务事实和数据的唯一来源。
 
-## Users
+## 用户角色
 
-- Customers submit support tickets, read sent replies, cancel open tickets, and rate closed tickets.
-- Agents process tickets, use AI analysis and reply suggestions, review replies, send approved replies, and search the knowledge base.
-- Admins have agent capabilities plus knowledge-base management.
+- 客户：提交工单、查看已发送的回复、取消开放中的工单，并评价已关闭的工单。
+- 客服：处理工单，使用 AI 分析和回复建议，审核回复，发送已批准的回复，并检索知识库。
+- 管理员：拥有客服的全部能力，并负责知识库管理。
 
-## Product Purpose
+## 产品目的
 
-AI Support Workbench is an internal customer-support workbench for handling tickets through a controlled lifecycle: intake, analysis, human review, approved response, closure, and evaluation. Success means support staff can scan and act quickly while every consequential action remains explicit and auditable.
+AI Support Workbench 是一个面向企业客服团队的内部工单工作台，用于管理从受理、分析、人工审核、批准回复、关闭到评价的完整流程。产品成功的标准是：客服能够快速扫描和处理工单，同时每个关键操作都明确、可控并且可审计。
 
-## Positioning
+## 产品定位
 
-The product combines a ticket state machine, asynchronous AI assistance, retrieval-backed knowledge search, and mandatory human review in one operational workflow. AI can assist with analysis and drafting but cannot bypass human approval or backend authorization.
+产品将工单状态机、异步 AI 辅助、基于检索的知识库搜索和强制人工审核整合到一套操作流程中。AI 可以辅助分析和起草回复，但不能绕过人工批准，也不能绕过后端权限控制。
 
-## Operating Context
+## 使用场景
 
-This is a high-frequency internal operations tool used on desktop screens and mobile browsers. Users work from tables, filters, ticket detail panels, status indicators, review controls, asynchronous task states, and paginated knowledge documents. The backend API is the source of truth for permissions, ticket state, and data visibility.
+这是一个高频使用的内部运营工具，面向桌面屏幕和移动浏览器。用户主要通过表格、筛选器、工单详情面板、状态指示、审核控件、异步任务状态和分页知识文档完成工作。后端 API 是权限、工单状态和数据可见性的唯一事实来源。
 
-## Capabilities and Constraints
+## 能力与约束
 
-- Authentication uses POST /auth/login and GET /auth/me with a browser-only access token stored in memory or sessionStorage.
-- Customers see only their own tickets and sent replies. Agents and admins see staff ticket data.
-- Ticket status changes must use the transition API. The frontend must not replace backend RBAC.
-- AI analysis and reply suggestions are asynchronous and must be polled every three seconds while pending or processing, then stopped on unmount.
-- AI suggestions are labeled and can only be sent after human review.
-- Knowledge uploads are restricted to sanitized TXT/PDF files; real private documents and secrets must never be committed.
-- API errors must surface safe messages for 400, 401, 403, 404, 409, 422, network failure, loading, empty, and success states.
-- Destructive actions require a second confirmation.
+- 认证使用 `POST /auth/login` 和 `GET /auth/me`；访问令牌只能保存在浏览器内存或 `sessionStorage` 中。
+- 客户只能看到自己的工单和已发送的回复；客服与管理员可以查看客服工作范围内的工单数据。
+- 工单状态变更必须使用 transition API；前端不能替代后端 RBAC。
+- AI 分析和回复建议是异步任务，在 `pending` 或 `processing` 状态期间每 3 秒轮询一次，并在组件卸载时停止轮询。
+- AI 建议必须明确标识，只有经过人工审核后才能发送。
+- 知识库只能上传已脱敏的 TXT/PDF 文件；真实私人文档和密钥绝不能提交到代码仓库。
+- API 必须对 400、401、403、404、409、422、网络失败、加载中、空状态和成功状态提供安全、清晰的提示。
+- 删除等破坏性操作必须进行二次确认。
 
-## Brand Commitments
+## 品牌约束
 
-The product name is AI Support Workbench. The interface should feel like a focused internal operations console, not a marketing landing page.
+产品名称为 AI Support Workbench。界面应当像专注、高效的内部运营控制台，而不是营销落地页。
 
-## Evidence on Hand
+## 现有依据
 
-The existing FastAPI routes, Pydantic schemas, service layer, tests, and docs in this repository are the only product evidence. No frontend visual system or production support data exists yet; UI demonstrations must use clearly synthetic local display states or live API responses, never fabricated customer records presented as real data.
+仓库中的 FastAPI 路由、Pydantic schema、服务层、测试和文档是当前唯一的产品依据。项目暂时没有成熟的前端视觉系统或生产客服数据；界面演示只能使用明确标注的本地合成状态或真实 API 返回，不能把虚构的客户记录伪装成真实数据。
 
-## Product Principles
+## 产品原则
 
-- State and permissions must be visible before action.
-- Human review remains the gate for AI-assisted replies.
-- Dense information is useful when grouping and hierarchy stay clear.
-- Every loading, empty, error, success, forbidden, and not-found state teaches the next action.
-- Backend contracts decide access and business state; frontend controls only presentation and flow.
+- 操作前必须让用户看见当前状态和权限边界。
+- 人工审核始终是 AI 辅助回复的发送门槛。
+- 当分组和层级清晰时，高密度信息有助于提高工作效率。
+- 每个加载、空、错误、成功、无权限和未找到状态都应当告诉用户下一步怎么做。
+- 后端契约决定访问权限和业务状态；前端只负责呈现和流程组织。
 
-## Accessibility & Inclusion
+## 无障碍与包容性
 
-Interactive controls need keyboard-visible focus, text plus icon or color for status, resilient long-text layout, readable contrast, and mobile layouts that do not require horizontal page scrolling. Icon-only controls require accessible names or tooltips.
+交互控件必须提供键盘可见焦点；状态不能只依赖颜色，还要使用文字或图标；长文本需要稳定换行；界面需要具备可读对比度；移动端页面不能要求用户横向滚动整个页面。只有图标的按钮必须提供可访问名称或 tooltip。

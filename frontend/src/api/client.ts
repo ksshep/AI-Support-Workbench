@@ -1,4 +1,4 @@
-import type { AIJob, KnowledgeItem, Page, SearchResult, Ticket, TicketDetail, User } from '@/types'
+import type { AIJob, KnowledgeItem, Page, ReplySuggestionJob, ReplySuggestionRequest, SearchResult, Ticket, TicketDetail, User } from '@/types'
 
 const base = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
 
@@ -49,6 +49,8 @@ export const api = {
   sendReply: (ticketId: string, replyId: string) => request(`/tickets/${ticketId}/replies/${replyId}/send`, { method: 'POST' }),
   triggerAnalysis: (id: string) => request<AIJob>(`/tickets/${id}/ai-analysis/trigger`, { method: 'POST' }),
   getAnalysis: (id: string) => request<AIJob>(`/tickets/${id}/ai-analysis`),
+  triggerReplySuggestion: (id: string) => request<ReplySuggestionRequest>(`/tickets/${id}/reply-suggestions`, { method: 'POST' }),
+  getReplySuggestion: (id: string) => request<ReplySuggestionJob>(`/tickets/${id}/reply-suggestions`),
   getEvaluation: (id: string) => request<{ id: string; ticket_id: string; rating: number; comment?: string | null; created_at: string }>(`/tickets/${id}/evaluation`),
   createEvaluation: (id: string, rating: number, comment?: string) => request(`/tickets/${id}/evaluation`, json({ rating, comment: comment || null })),
   listKnowledge: (params: Record<string, string | number | undefined>) => request<Page<KnowledgeItem>>(`/knowledge-items?${new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== '').map(([k, v]) => [k, String(v)]))}`),

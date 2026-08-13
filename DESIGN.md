@@ -1,31 +1,31 @@
-# AI Support Workbench Design
+# AI Support Workbench 设计规范
 
-## Mode
+## 产品模式
 
-Operate. This is a high-frequency internal customer-support console. The primary quality bar is scanability, explicit state, and low cognitive load during ticket handling.
+Operate（操作型）。这是一个高频使用的内部客服运营控制台，首要质量标准是信息易扫描、状态明确，以及处理工单时保持较低的认知负担。
 
-## Visual World
+## 视觉世界
 
-Registration desk / shift console: an ink-dark navigation rail and matte paper-white work surface, with compact registration marks, hairline rules, and small uppercase labels that make operational state feel recorded rather than decorative. The visual language is restrained for daily use: teal is reserved for executable actions and healthy progress, amber for review and attention, red for destructive or failed states.
+采用“值班台 / 交接班控制台”的视觉语法：深色墨水质感的导航栏、哑光纸张质感的白色工作区、紧凑的登记标记、细分隔线和小号大写标签，让业务状态具有被记录和追踪的感觉，而不是装饰效果。整体视觉保持克制，适合日常高频使用：青绿色只用于可执行操作和健康进度，琥珀色用于审核和关注状态，红色用于破坏性操作和失败状态。
 
-## Palette
+## 色彩
 
-- Ink: #172126 for navigation and high-contrast text.
-- Paper: #f6f8f7 for the application surface.
-- Panel: #ffffff for framed tools and detail sections.
-- Rule: #dbe3e1 for separators and input borders.
-- Teal: #0d8a7b for primary actions and active navigation.
-- Amber: #c98627 for review and warning states.
-- Red: #c94a4a for errors and destructive actions.
+- 墨色：`#172126`，用于导航和高对比度文字。
+- 纸白：`#f6f8f7`，用于应用主背景。
+- 面板白：`#ffffff`，用于工具面板和详情区块。
+- 分隔线：`#dbe3e1`，用于分隔线和输入框边框。
+- 青绿色：`#0d8a7b`，用于主要操作和当前导航项。
+- 琥珀色：`#c98627`，用于审核和警告状态。
+- 红色：`#c94a4a`，用于错误和破坏性操作。
 
-## Composition
+## 页面构成
 
-Desktop uses a stable 240px navigation rail and a wide content canvas. Workbench pages lead with an eyebrow, title, summary metrics, then filters and dense tables. Ticket details use a two-column workspace with an activity timeline and an action panel. Mobile collapses the rail into a top bar and converts wide tables into stacked rows while keeping actions reachable.
+桌面端使用稳定的 240px 导航栏和宽阔的内容画布。工作台页面按照“眉题、页面标题、摘要指标、筛选器、密集表格”的顺序组织。工单详情页使用左右两栏工作区，左侧展示回复和活动记录，右侧展示处理动作和 AI 信息。移动端将侧边栏折叠为顶部导航，并将宽表格转换为可触达的紧凑列表，同时保证操作入口始终可用。
 
-## Typography
+## 字体排版
 
-System sans stacks provide familiar enterprise reading at a fixed, compact scale. Uppercase micro-labels use modest tracking for registration-mark character; body copy keeps comfortable line-height and bounded measure.
+使用系统无衬线字体栈，保证企业后台场景下的熟悉度和稳定阅读体验。小号大写标签使用适度字间距，形成登记标记的感觉；正文保持舒适的行高和受控的阅读宽度。
 
-## Interaction Rules
+## 交互规则
 
-Use icon-plus-label buttons for primary operations, icon-only buttons only with accessible names, and a shared status vocabulary that never depends on color alone. Poll asynchronous jobs every three seconds and stop polling on navigation/unmount. Destructive actions always require confirmation.
+主要操作使用“图标 + 文字”按钮；只有在具备可访问名称时才使用纯图标按钮。所有状态使用统一的状态词汇，不能只依赖颜色表达。异步任务每 3 秒轮询一次，并在导航或组件卸载时停止轮询。破坏性操作始终需要二次确认。
