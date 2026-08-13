@@ -17,7 +17,10 @@ if not base_database_url:
     raise RuntimeError("DATABASE_URL must be configured in .env to run tests")
 
 base_url = make_url(base_database_url)
-test_database_name = f"{base_url.database}_test"
+# Give every pytest process its own database. A fixed *_test database lets a
+# stale or parallel pytest process drop/truncate data while another process is
+# using it, which can block DDL or make an in-flight request lose its row.
+test_database_name = f"{base_url.database}_test_{os.getpid()}"
 test_url = base_url.set(database=test_database_name)
 
 # Create the test database on the same PostgreSQL instance when needed.
@@ -40,7 +43,7 @@ os.environ["DATABASE_URL"] = test_url.render_as_string(hide_password=False)
 # settings. Chat/embedding providers are not implemented in W1-A, but this
 # guard keeps future test suites deterministic.
 for _name in ("CHAT_PROVIDER", "EMBEDDING_PROVIDER"):
-    os.environ.setdefault(_name, "fake")
+    os.environ[_name] = "fake"
 for _name in (
     "CHAT_API_KEY",
     "CHAT_BASE_URL",
@@ -61,6 +64,18 @@ with engine.begin() as connection:
 
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _test_database_lifecycle():
+    """Drop this pytest process's database after the session finishes."""
+    yield
+    engine.dispose()
+    cleanup_engine = create_engine(maintenance_url)
+    with cleanup_engine.connect().execution_options(isolation_level="AUTOCOMMIT") as connection:
+        quoted_name = test_database_name.replace('"', '""')
+        connection.exec_driver_sql(f'DROP DATABASE IF EXISTS "{quoted_name}"')
+    cleanup_engine.dispose()
 
 
 @pytest.fixture(scope="session")
