@@ -78,5 +78,18 @@ services:
       REDIS_URL: redis://redis:6379/0
     command: ["python", "-m", "backend.worker"]
 
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: ai-workbench-frontend:latest
+    container_name: ai-workbench-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-5173}:80"
+
 volumes:
   ai_workbench_pgdata:
