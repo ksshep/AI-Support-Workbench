@@ -17,7 +17,9 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = sessionStorage.getItem('support_access_token')
   const headers = new Headers(init.headers)
   if (token) headers.set('Authorization', `Bearer ${token}`)
-  if (init.body && !(init.body instanceof FormData)) headers.set('Content-Type', 'application/json')
+  // JSON helpers pass a serialized string; preserve browser-managed content
+  // types for URLSearchParams (OAuth2 login) and multipart FormData uploads.
+  if (typeof init.body === 'string') headers.set('Content-Type', 'application/json')
   let response: Response
   try { response = await fetch(`${base}${path}`, { ...init, headers }) } catch { throw new ApiError(0, '网络连接失败，请检查服务是否可用') }
   const text = await response.text()
