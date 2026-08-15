@@ -33,7 +33,9 @@ const isStaff = computed(() => auth.user.value?.role !== 'customer')
 const isOwner = computed(() => ticket.value?.customer_id === auth.user.value?.id)
 const aiBusy = computed(() => Boolean(analysis.value && ['pending', 'processing'].includes(analysis.value.status)))
 const suggestionBusy = computed(() => Boolean(suggestion.value && ['pending', 'processing'].includes(suggestion.value.status)))
-const draft = computed(() => ticket.value?.replies.find((item) => item.status === 'draft'))
+// Use the newest actionable reply. AI and manual replies can coexist, and a
+// reviewed reply must remain sendable after the approval step.
+const draft = computed(() => ticket.value?.replies.slice().reverse().find((item) => ['draft', 'reviewed'].includes(item.status)))
 
 function date(value: string) {
   return new Date(value).toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
