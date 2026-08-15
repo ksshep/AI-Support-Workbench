@@ -1,8 +1,18 @@
 # AI Support Workbench
 
+[![CI](https://github.com/ksshep/AI-Support-Workbench/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ksshep/AI-Support-Workbench/actions/workflows/ci.yml)
+
 面向企业客服团队的 AI 工单协同工作台。
 
 客户提交工单后，系统异步完成 AI 分析，从企业知识库检索依据并生成回复草稿；客服人工审核后发送，客户查看结果并评价。AI 只能生成草稿，不能绕过人工审核自动发送。
+
+## 持续集成
+
+GitHub Actions 工作流位于 `.github/workflows/ci.yml`，在每次 push 到 `main`、提交指向 `main` 的 Pull Request 或手动触发时执行：
+
+- `backend-test` 使用 Python 3.13、PostgreSQL + pgvector 和 Redis 服务容器运行后端 pytest，并强制使用 `CHAT_PROVIDER=fake` 与 `EMBEDDING_PROVIDER=fake`。
+- `frontend-build` 使用 Node.js 22 执行 `npm ci` 和 `npm run build`，验证 `vue-tsc` 与 Vite build。
+- `quality-check` 执行 `git diff --check`，并从 `.env.example` 生成临时 `.env` 后校验 Docker Compose 配置，不启动完整 Compose 服务。
 
 ## 产品能力
 
